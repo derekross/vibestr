@@ -14,16 +14,19 @@ import {
 import { toast } from '@/hooks/useToast.ts';
 import { useLoginActions } from '@/hooks/useLoginActions';
 import { generateSecretKey, nip19 } from 'nostr-tools';
+import { ProfileSetupDialog } from './ProfileSetupDialog';
 
 interface SignupDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onComplete?: () => void;
 }
 
-const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose }) => {
-  const [step, setStep] = useState<'generate' | 'download' | 'done'>('generate');
+const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose, onComplete }) => {
+  const [step, setStep] = useState<'generate' | 'download' | 'profile' | 'done'>('generate');
   const [isLoading, setIsLoading] = useState(false);
   const [nsec, setNsec] = useState('');
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
   const login = useLoginActions();
 
   // Generate a proper nsec key using nostr-tools
@@ -73,14 +76,27 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose }) => {
 
   const finishSignup = () => {
     login.nsec(nsec);
-
-    setStep('done');
-    onClose();
+    setStep('profile');
+    setShowProfileSetup(true);
 
     toast({
       title: 'Account created',
-      description: 'You are now logged in.',
+      description: 'You are now logged in. Let\'s set up your profile!',
     });
+  };
+
+  const handleProfileSetupComplete = () => {
+    setShowProfileSetup(false);
+    setStep('done');
+    onClose();
+    onComplete?.();
+  };
+
+  const handleProfileSetupClose = () => {
+    setShowProfileSetup(false);
+    setStep('done');
+    onClose();
+    onComplete?.();
   };
 
   return (
@@ -90,11 +106,13 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose }) => {
           <DialogTitle className='text-xl font-semibold text-center'>
             {step === 'generate' && 'Create Your Account'}
             {step === 'download' && 'Download Your Key'}
+            {step === 'profile' && 'Account Created!'}
             {step === 'done' && 'Setting Up Your Account'}
           </DialogTitle>
           <DialogDescription className='text-center text-muted-foreground mt-2'>
             {step === 'generate' && 'Generate a secure key for your account'}
             {step === 'download' && "Keep your key safe - you'll need it to log in"}
+            {step === 'profile' && 'Your account is ready. Setting up your profile...'}
             {step === 'done' && 'Finalizing your account setup'}
           </DialogDescription>
         </DialogHeader>
@@ -153,6 +171,12 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose }) => {
             </div>
           )}
 
+          {step === 'profile' && (
+            <div className='flex justify-center items-center py-8'>
+              <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary'></div>
+            </div>
+          )}
+
           {step === 'done' && (
             <div className='flex justify-center items-center py-8'>
               <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary'></div>
@@ -160,6 +184,12 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose }) => {
           )}
         </div>
       </DialogContent>
+
+      <ProfileSetupDialog
+        isOpen={showProfileSetup}
+        onClose={handleProfileSetupClose}
+        onComplete={handleProfileSetupComplete}
+      />
     </Dialog>
   );
 };

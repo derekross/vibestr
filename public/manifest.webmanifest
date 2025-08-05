@@ -1,0 +1,16 @@
+{
+  "name": "Vibe Coders",
+  "short_name": "Vibe Coders",
+  "description": "A community for vibe coding enthusiasts to share tools, tips, tricks, experiences, and apps built on Nostr.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

@@ -1,25 +1,22 @@
 import { useSeoMeta } from '@unhead/react';
-
-// FIXME: Update this page (the content is just a fallback if you fail to update the page)
+import { CommunityPage } from "@/components/community/CommunityPage";
+import { WelcomeSection } from "@/components/WelcomeSection";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const Index = () => {
+  const { user } = useCurrentUser();
+
   useSeoMeta({
-    title: 'Welcome to Your Blank App',
-    description: 'A modern Nostr client application built with React, TailwindCSS, and Nostrify.',
+    title: 'Vibestr - Community for Vibe Coding',
+    description: 'A community for vibe coding enthusiasts to share tools, tips, tricks, experiences, and apps built on Nostr.',
   });
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">
-          Welcome to Your Blank App
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400">
-          Start building your amazing project here!
-        </p>
-      </div>
-    </div>
-  );
+  // Show welcome section for non-logged-in users, community page for logged-in users
+  if (!user) {
+    return <WelcomeSection />;
+  }
+
+  return <CommunityPage />;
 };
 
 export default Index;

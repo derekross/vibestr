@@ -24,6 +24,11 @@ export function LoginArea({ className }: LoginAreaProps) {
     setSignupDialogOpen(false);
   };
 
+  const handleSignupComplete = () => {
+    setSignupDialogOpen(false);
+    setLoginDialogOpen(false);
+  };
+
   return (
     <div className={cn("inline-flex items-center justify-center", className)}>
       {currentUser ? (
@@ -48,6 +53,7 @@ export function LoginArea({ className }: LoginAreaProps) {
       <SignupDialog
         isOpen={signupDialogOpen}
         onClose={() => setSignupDialogOpen(false)}
+        onComplete={handleSignupComplete}
       />
     </div>
   );
