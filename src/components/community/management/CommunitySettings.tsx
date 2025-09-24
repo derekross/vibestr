@@ -25,7 +25,8 @@ interface CommunitySettingsProps {
 export function CommunitySettings({ community, isOwner }: CommunitySettingsProps) {
   const [name, setName] = useState(community.name);
   const [description, setDescription] = useState(community.description || '');
-  const [image, setImage] = useState('');
+  const [image, setImage] = useState(community.image || '');
+  const [banner, setBanner] = useState(community.banner || '');
   const { toast } = useToast();
 
   const handleSave = async () => {
@@ -94,6 +95,23 @@ export function CommunitySettings({ community, isOwner }: CommunitySettingsProps
               placeholder="https://example.com/image.jpg"
               disabled={!isOwner}
             />
+            <p className="text-xs text-muted-foreground">
+              Square image used as community avatar/logo in sidebar
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="banner">Community Banner URL</Label>
+            <Input
+              id="banner"
+              value={banner}
+              onChange={(e) => setBanner(e.target.value)}
+              placeholder="https://example.com/banner.jpg"
+              disabled={!isOwner}
+            />
+            <p className="text-xs text-muted-foreground">
+              Wide banner image displayed at the top of the community page
+            </p>
           </div>
 
           {isOwner && (

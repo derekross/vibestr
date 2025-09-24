@@ -45,7 +45,8 @@ export function PostMenu({ event, isReply = false, className }: PostMenuProps) {
   const isPostPinned = !isReply && isPinnedPost(event.id, pinnedPostsEvent || null);
   const isOwnPost = user && event.pubkey === user.pubkey;
 
-  const handleSharePost = async () => {
+  const handleSharePost = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     const baseUrl = window.location.origin;
     const postUrl = isReply 
       ? `${baseUrl}/post/${event.id}` // For replies, link directly to the reply
@@ -82,7 +83,8 @@ export function PostMenu({ event, isReply = false, className }: PostMenuProps) {
     setIsOpen(false);
   };
 
-  const handleCopyEventId = async () => {
+  const handleCopyEventId = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     try {
       await navigator.clipboard.writeText(event.id);
       toast({
@@ -99,7 +101,8 @@ export function PostMenu({ event, isReply = false, className }: PostMenuProps) {
     setIsOpen(false);
   };
 
-  const handleViewRaw = () => {
+  const handleViewRaw = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     const eventJson = JSON.stringify(event, null, 2);
     const blob = new Blob([eventJson], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -108,7 +111,8 @@ export function PostMenu({ event, isReply = false, className }: PostMenuProps) {
     setIsOpen(false);
   };
 
-  const handlePinPost = async () => {
+  const handlePinPost = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (isReply) return; // Can't pin replies
     
     try {
@@ -132,7 +136,8 @@ export function PostMenu({ event, isReply = false, className }: PostMenuProps) {
     setIsOpen(false);
   };
 
-  const handleRemovePost = async () => {
+  const handleRemovePost = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     try {
       await removePost.mutateAsync({
         postId: event.id,
@@ -154,7 +159,8 @@ export function PostMenu({ event, isReply = false, className }: PostMenuProps) {
     setIsOpen(false);
   };
 
-  const handleBanUser = async () => {
+  const handleBanUser = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (isOwnPost) {
       toast({
         title: "Error",
@@ -186,7 +192,12 @@ export function PostMenu({ event, isReply = false, className }: PostMenuProps) {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className={className}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={className}
+          onClick={(e) => e.stopPropagation()}
+        >
           <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">More options</span>
         </Button>

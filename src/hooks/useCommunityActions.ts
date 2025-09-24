@@ -272,6 +272,7 @@ export function useApprovePost(communityId: string = VIBE_CODERS_COMMUNITY_ID) {
 export function useRemovePost(communityId: string = VIBE_CODERS_COMMUNITY_ID) {
   const { user } = useCurrentUser();
   const { mutate: createEvent } = useNostrPublish();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ 

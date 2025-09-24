@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { NostrEvent } from '@nostrify/nostrify';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,13 +18,14 @@ import {
 } from 'lucide-react';
 import { useAuthor } from '@/hooks/useAuthor';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useCommunityPostReplies } from '@/hooks/useCommunityPosts';
+import { useCommunityPostReplies, useCommunityPostReplyCount } from '@/hooks/useCommunityPosts';
 import { useVibeCodersActions } from '@/hooks/useCommunityActions';
 import { usePinnedPosts } from '@/hooks/useCommunityModeration';
 import { useEventReactions, useUserReaction, useReactionActions } from '@/hooks/useReactions';
 import { useToast } from '@/hooks/useToast';
 import { NoteContent } from '@/components/NoteContent';
 import { PostMenu } from '@/components/community/PostMenu';
+import { ZapButton } from '@/components/ZapButton';
 import { genUserName } from '@/lib/genUserName';
 import { isPinnedPost, VIBE_CODERS_COMMUNITY_ID } from '@/lib/community';
 import { formatDistanceToNow } from 'date-fns';
@@ -157,9 +159,14 @@ export function CommunityPost({ event, showReplies = false }: CommunityPostProps
   const [replyContent, setReplyContent] = useState('');
   const [repliesExpanded, setRepliesExpanded] = useState(false);
 
+  const navigate = useNavigate();
   const { user } = useCurrentUser();
   const author = useAuthor(event.pubkey);
   const { data: replies } = useCommunityPostReplies(
+    event.id,
+    VIBE_CODERS_COMMUNITY_ID
+  );
+  const { data: replyCount = 0 } = useCommunityPostReplyCount(
     event.id,
     VIBE_CODERS_COMMUNITY_ID
   );
@@ -254,21 +261,15 @@ export function CommunityPost({ event, showReplies = false }: CommunityPostProps
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setRepliesExpanded(!repliesExpanded)}
+                onClick={() => navigate(`/community/post/${event.id}`)}
                 className="text-muted-foreground hover:text-foreground"
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
-                {replies?.length || 0} {replies?.length === 1 ? 'Reply' : 'Replies'}
-                {replies && replies.length > 0 && (
-                  repliesExpanded ? (
-                    <ChevronUp className="h-4 w-4 ml-1" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 ml-1" />
-                  )
-                )}
+                {replyCount} {replyCount === 1 ? 'Reply' : 'Replies'}
               </Button>
 
               <LikeButton event={event} />
+              <ZapButton target={event} className="text-sm" showCount={true} />
             </div>
 
             {user && (
@@ -436,6 +437,7 @@ function CommunityReply({ event }: { event: NostrEvent }) {
           {/* Reply Actions */}
           <div className="flex items-center gap-2">
             <LikeButton event={event} size="xs" />
+            <ZapButton target={event} className="text-xs" showCount={true} />
             {user && (
               <Button
                 variant="ghost"

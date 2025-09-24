@@ -6,6 +6,8 @@ import { NotificationProvider } from "./components/NotificationProvider";
 
 import Index from "./pages/Index";
 import PostPage from "./pages/PostPage";
+import { PostDetail } from "./pages/PostDetail";
+import { CommunityPage } from "./components/community/CommunityPage";
 import NotFound from "./pages/NotFound";
 
 export function AppRouter() {
@@ -18,7 +20,9 @@ export function AppRouter() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/community" element={<CommunityPage />} />
               <Route path="/post/:eventId" element={<PostPage />} />
+              <Route path="/community/post/:postId" element={<PostDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

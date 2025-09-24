@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { Code } from 'lucide-react';
 import { LoginArea } from '@/components/auth/LoginArea';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -17,9 +16,6 @@ export function AppHeader() {
               </div>
               <h1 className="text-xl font-bold">Vibestr</h1>
             </div>
-            <Badge variant="secondary" className="text-xs">
-              NIP-72 Community
-            </Badge>
           </div>
 
           {/* Navigation and Login */}

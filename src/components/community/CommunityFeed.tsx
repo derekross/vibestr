@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MessageSquare } from 'lucide-react';
 import { useVibeCodersPosts } from '@/hooks/useCommunityPosts';
-import { CommunityPost } from './CommunityPost';
+import { RedditStylePost } from './RedditStylePost';
 import { RelaySelector } from '@/components/RelaySelector';
 
 export function CommunityFeed() {
@@ -82,7 +82,7 @@ export function CommunityFeed() {
     <div className="space-y-4">
       {/* Posts Feed */}
       {posts.map((post) => (
-        <CommunityPost key={post.id} event={post} showReplies={true} />
+        <RedditStylePost key={post.id} event={post} />
       ))}
 
       

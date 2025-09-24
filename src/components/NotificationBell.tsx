@@ -123,7 +123,9 @@ export function NotificationBell() {
     return null;
   }
 
-  const handleMarkAllRead = () => {
+  const handleMarkAllRead = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     markAllAsRead();
   };
 

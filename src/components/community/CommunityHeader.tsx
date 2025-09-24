@@ -1,130 +1,116 @@
 import { useState } from 'react';
+import { Users, Plus, Bell, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Settings } from 'lucide-react';
-import { CommunityManagement } from './CommunityManagement';
-import { useVibeCodersCommunity } from '@/hooks/useCommunity';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useVibeCodersActions } from '@/hooks/useCommunityActions';
-import { isModerator, getUniqueModeratorsCount } from '@/lib/community';
-import { useToast } from '@/hooks/useToast';
+import { useVibeCodersCommunity } from '@/hooks/useCommunity';
+import { isModerator, getUniqueModerators } from '@/lib/community';
+import { CommunityPostForm } from './CommunityPostForm';
+import { CommunityManagement } from './CommunityManagement';
 
 export function CommunityHeader() {
-  const [showManagement, setShowManagement] = useState(false);
-  const { data: community, isLoading } = useVibeCodersCommunity();
   const { user } = useCurrentUser();
-  const { joinCommunity } = useVibeCodersActions();
-  const { toast } = useToast();
+  const { data: community } = useVibeCodersCommunity();
+  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [isManagementOpen, setIsManagementOpen] = useState(false);
 
-  const handleJoinCommunity = async () => {
-    try {
-      await joinCommunity.mutateAsync({
-        message: "I'm excited to join the Vibestr community and share my passion for vibe coding, tools, and experiences!"
-      });
-      toast({
-        title: "Join request sent!",
-        description: "Your request to join Vibestr has been submitted to the moderators.",
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to send join request. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-16 w-16 rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-3/4" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!community) {
-    return (
-      <Card className="border-dashed">
-        <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">Community not found</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const isUserModerator = user && isModerator(user.pubkey, community);
-
-  if (showManagement && isUserModerator) {
-    return <CommunityManagement onClose={() => setShowManagement(false)} />;
-  }
+  const userIsModerator = user && community && isModerator(user.pubkey, community);
+  const moderatorCount = community ? getUniqueModerators(community).length : 0;
 
   return (
-    <Card>
-      <CardHeader className="p-3 sm:p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={community.image} alt={community.name} />
-              <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-purple-500 to-blue-500 text-white">
-                VC
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-2xl font-bold">
-                {community.name}
-              </h1>
-              <p className="text-muted-foreground">
-                {(() => {
-                  const count = getUniqueModeratorsCount(community);
-                  return `${count} moderator${count !== 1 ? 's' : ''}`;
-                })()}
-              </p>
+    <div className="bg-background border-b">
+      <div className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto">
+        {/* Banner Image - spans full width */}
+        <div
+          className="h-32 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 relative overflow-hidden rounded-lg mb-4"
+          style={{
+            backgroundImage: community?.banner
+              ? `url(${community.banner})`
+              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/20 rounded-lg" />
+
+          {/* Pattern overlay only when no banner */}
+          {!community?.banner && (
+            <div className="absolute inset-0 opacity-10 rounded-lg">
+              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+                <defs>
+                  <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
+                  </pattern>
+                </defs>
+                <rect width="100" height="100" fill="url(#grid)" />
+              </svg>
             </div>
-          </div>
-          
-          <div className="flex gap-2">
-            {isUserModerator && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowManagement(true)}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Manage
-              </Button>
+          )}
+        </div>
+
+        {/* Community Info - spans full width */}
+        <div className="flex items-start gap-4">
+          {/* Community Details */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-2xl font-bold">
+                {community?.name || 'Vibe Coding'}
+              </h1>
+            </div>
+
+
+            {community?.description && (
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                {community.description}
+              </p>
             )}
-            {user && !isUserModerator && (
-              <Button 
-                onClick={handleJoinCommunity}
-                disabled={joinCommunity.isPending}
-                size="sm"
-              >
-                {joinCommunity.isPending ? 'Joining...' : 'Join Community'}
-              </Button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            {user && (
+              <>
+                <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="gap-2">
+                      <Plus className="h-4 w-4" />
+                      Create Post
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-hidden">
+                    <DialogHeader>
+                      <DialogTitle>Create a Post</DialogTitle>
+                    </DialogHeader>
+                    <CommunityPostForm onSuccess={() => setIsPostDialogOpen(false)} />
+                  </DialogContent>
+                </Dialog>
+                {userIsModerator && (
+                  <Dialog open={isManagementOpen} onOpenChange={setIsManagementOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Settings className="h-4 w-4" />
+                        Manage
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto" hideClose>
+                      <CommunityManagement onClose={() => setIsManagementOpen(false)} />
+                    </DialogContent>
+                  </Dialog>
+                )}
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Bell className="h-4 w-4" />
+                  Join
+                </Button>
+              </>
             )}
           </div>
         </div>
-      </CardHeader>
-      
-      {community.description && (
-        <CardContent className="p-3 sm:p-6">
-          <p className="text-sm leading-relaxed">{community.description}</p>
-        </CardContent>
-      )}
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 }

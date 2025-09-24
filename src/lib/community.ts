@@ -26,9 +26,12 @@ export interface CommunityMetadata {
   name: string;
   description?: string;
   image?: string;
+  banner?: string;
+  rules?: string[];
   creator: string;
   moderators: string[];
   relays?: string[];
+  created: number; // Unix timestamp
 }
 
 // Parse community ID into components
@@ -69,7 +72,33 @@ export function extractCommunityMetadata(event: NostrEvent): CommunityMetadata |
   const name = event.tags.find(([name]) => name === 'name')?.[1] || dTag;
   const description = event.tags.find(([name]) => name === 'description')?.[1];
   const image = event.tags.find(([name]) => name === 'image')?.[1];
-  
+  const banner = event.tags.find(([name]) => name === 'banner')?.[1];
+
+  // Extract rules from 'rule' tags
+  const rulesTags = event.tags
+    .filter(([name]) => name === 'rule')
+    .map(([, rule]) => rule)
+    .filter(Boolean);
+
+  // If no rule tags, try parsing rules from content (JSON or plain text)
+  let rules: string[] = rulesTags;
+  if (rules.length === 0 && event.content) {
+    try {
+      // Try parsing as JSON first
+      const contentData = JSON.parse(event.content);
+      if (Array.isArray(contentData.rules)) {
+        rules = contentData.rules;
+      } else if (typeof contentData.rules === 'string') {
+        rules = [contentData.rules];
+      }
+    } catch {
+      // If not JSON, treat content as single rule if it looks like rules text
+      if (event.content.includes('rule') || event.content.includes('Rule') || event.content.includes('RULE')) {
+        rules = event.content.split('\n').filter(line => line.trim()).slice(0, 10); // Limit to 10 rules
+      }
+    }
+  }
+
   const moderators = event.tags
     .filter(([name, , , role]) => name === 'p' && role === 'moderator')
     .map(([, pubkey]) => pubkey);
@@ -83,9 +112,12 @@ export function extractCommunityMetadata(event: NostrEvent): CommunityMetadata |
     name,
     description,
     image,
+    banner,
+    rules: rules.length > 0 ? rules : undefined,
     creator: event.pubkey,
     moderators,
     relays,
+    created: event.created_at,
   };
 }
 

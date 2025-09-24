@@ -2,7 +2,7 @@
 // It is important that all functionality in this file is preserved, and should only be modified if explicitly requested.
 
 import { useState } from 'react';
-import { ChevronDown, LogOut, UserIcon, UserPlus, Settings } from 'lucide-react';
+import { ChevronDown, LogOut, UserIcon, UserPlus, Settings, Wallet } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import { RelaySelector } from '@/components/RelaySelector';
 import { useLoggedInAccounts, type Account } from '@/hooks/useLoggedInAccounts';
 import { genUserName } from '@/lib/genUserName';
 import { EditProfileDialog } from './EditProfileDialog';
+import { WalletModal } from '@/components/WalletModal';
 
 interface AccountSwitcherProps {
   onAddAccountClick: () => void;
@@ -66,6 +67,15 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
+        <WalletModal>
+          <DropdownMenuItem
+            className='flex items-center gap-2 cursor-pointer p-2 rounded-md'
+            onSelect={(e) => e.preventDefault()}
+          >
+            <Wallet className='w-4 h-4' />
+            <span>Wallet Settings</span>
+          </DropdownMenuItem>
+        </WalletModal>
         <DropdownMenuItem
           onClick={() => setEditProfileOpen(true)}
           className='flex items-center gap-2 cursor-pointer p-2 rounded-md'
