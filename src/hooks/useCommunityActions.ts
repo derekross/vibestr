@@ -305,6 +305,14 @@ export function useRemovePost(communityId: string = VIBE_CODERS_COMMUNITY_ID) {
 
       return event;
     },
+    onSuccess: (_, variables) => {
+      // Invalidate community posts to refresh the feed (removes the post from UI)
+      queryClient.invalidateQueries({ queryKey: ['community-posts', communityId] });
+      // Also invalidate post removals to update the removed posts cache
+      queryClient.invalidateQueries({ queryKey: ['post-removals', communityId] });
+      // Invalidate any replies for the removed post
+      queryClient.invalidateQueries({ queryKey: ['community-post-replies', variables.postId, communityId] });
+    },
   });
 }
 
@@ -357,6 +365,8 @@ export function usePinPost(communityId: string = VIBE_CODERS_COMMUNITY_ID) {
     onSuccess: () => {
       // Invalidate pinned posts query
       queryClient.invalidateQueries({ queryKey: ['pinned-posts', communityId] });
+      // Also invalidate community posts to refresh sorting (pinned posts go to top)
+      queryClient.invalidateQueries({ queryKey: ['community-posts', communityId] });
     },
   });
 }
